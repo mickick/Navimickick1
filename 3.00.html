@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meine Karte</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { margin: 0; padding: 10px; font-family: Arial; }
+        #map { width: 100%; height: 600px; border: 1px solid #ccc; }
+        #status { padding: 10px; margin-bottom: 10px; background: #f0f0f0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Meine Karte</h1>
+    <div id="status">Aktuellen Standort wird ermittelt...</div>
+    <div id="map"></div>
+
+    <script>
+        // Karte initialisieren
+        const map = L.map('map').setView([51.5, 10], 7);
+
+        // Kartenkacheln
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        // BLAUER PIN (fest)
+        L.marker([51.0522583, 13.9009817], {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            })
+        }).addTo(map).bindPopup('<b>Fester Standort</b>');
+
+        // ORANGER PIN (aktueller Standort)
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Orange Pin hinzufügen
+                    L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34]
+                        })
+                    }).addTo(map).bindPopup('<b>Dein aktueller Standort</b>');
+
+                    // Karte zum aktuellen Standort zoomen
+                    map.setView([lat, lng], 10);
+                    document.getElementById('status').innerHTML = `✓ Standort gefunden: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                },
+                function(error) {
+                    document.getElementById('status').innerHTML = `✗ Fehler: ${error.message}`;
+                }
+            );
+        } else {
+            document.getElementById('status').innerHTML = '✗ Geolocation wird nicht unterstützt';
+        }
+    </script>
+</body>
+</html>
